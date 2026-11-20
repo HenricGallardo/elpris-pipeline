@@ -4,7 +4,7 @@ from datetime import date, timedelta # Verktyg för att räkna med datum
 import json                          # Verktyg för att spara och läsa JSON-filer
 
 start = date(2026, 1, 1)             # Första dagen vi vill hämta: 1 januari 2026
-end = date(2026, 1, 3)               # Sista dagen vi vill hämta (3 dagar för att testa)
+end = date(2026, 11, 20)             # Sista dagen: idag
 
 all_data = []                        # En tom lista där vi samlar all data
 day = start                          # Vi börjar på första dagen
