@@ -227,3 +227,6 @@ __marimo__/
 
 # Exporterad data
 *.xlsx
+
+# Data
+data/
