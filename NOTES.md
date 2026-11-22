@@ -7,19 +7,20 @@
       (date, hour, minute, weekday 1–7, month, is_weekend)
 - [x] PostgreSQL körs i Docker (docker-compose.yml)
       Användare: postgres, lösenord: elpris, databas: postgres, port: 5432
-- [ ] sqlalchemy + psycopg2-binary installerade
+- [x] extract.py hämtar fram till date.today() (inget hårdkodat slutdatum)
+- [x] sqlalchemy + psycopg2-binary installerade
 - [ ] Load: spara den rena tabellen i PostgreSQL   ← BÖRJA HÄR
 
+
 ## Nästa steg
-1. Starta Docker Desktop
-2. Kör `docker compose up -d` och kolla med `docker ps`
-3. Testa anslutningen i load.py med `SELECT version();`
-4. Gör transform.py till en funktion så att load.py kan använda den
-5. Skriv tabellen till databasen med df.to_sql()
+1. Starta Docker Desktop och kör `docker compose up -d`
+2. Kör load.py och se att `SELECT version();` svarar (anslutningstest)
+3. Gör transform.py till en funktion så att load.py kan använda den
+4. Skriv tabellen till databasen med df.to_sql()
 
 ## Senare
 - Export till Excel → Power BI
-- Tester (pytest) + CI (GitHub Actions)
+- Tester (pytest) + CI (GitHub Actions)   
 - Helgdagar som extra data
 - Fullstack-app: FastAPI + React (TypeScript), kvartsdiagram per elområde
 
