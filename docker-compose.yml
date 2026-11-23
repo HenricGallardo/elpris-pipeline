@@ -5,7 +5,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_PASSWORD: elpris           # Bara för lokal utveckling. Användare och databas heter "postgres"
+      POSTGRES_USER: henrik
+      POSTGRES_PASSWORD: crazy_db
+      POSTGRES_DB: elpris
     ports:
       - "5432:5432"                       # Macen:containern
     volumes:
