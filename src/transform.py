@@ -1,5 +1,4 @@
 import pandas as pd                                             # Bibliotek för att arbeta med tabeller
-print("transform.py heter just nu:", __name__)
 
 def transform():
     """Läser rådatan och returnerar en ren tabell."""
