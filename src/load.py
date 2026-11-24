@@ -20,4 +20,13 @@ with engine.connect() as conn:                          # Öppna anslutningen (s
 
 # --- 4. Hämta den rena tabellen ---
 df = transform()                                        # Kör transform och ta emot den rena tabellen
-print(df.shape)                                         # Hur många rader och kolumner (bör vara 124416+ och 9)
+# print(df.shape)                                         # Hur många rader och kolumner (bör vara 124416+ och 9)
+
+# --- 5. Skriv tabellen till databasen ---
+df.to_sql(
+    "prices",              # Tabellens namn i databasen
+    engine,                # Anslutningen: vilken databas vi skriver till
+    if_exists="replace",   # Om tabellen redan finns: ersätt den
+    index=False,           # Ta inte med pandas radnummer (0, 1, 2 ...) som en kolumn
+)
+print("Klart! Allting fungerade som tänkt!")
