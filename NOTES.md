@@ -11,15 +11,19 @@
 - [x] Load: load(df) lägger till rader i tabellen prices (if_exists="append")
       get_latest_date() frågar efter senaste datumet (None om tabellen saknas)
 - [x] main.py kör hela pipelinen: extract → transform → load
-- [x] Inkrementell hämtning: main hämtar bara dagar som saknas i databasen
-      Tom databas → börjar från FIRST_DATE (2026-01-01)
-      Redan uppdaterad → "Inget nytt att hämta"
-- [ ] Schemaläggning: kör pipelinen automatiskt varje dag   ← BÖRJA HÄR
+- [x] Inkrementell hämtning fungerar (testat genom att radera dagar)
+- [x] Supabase-projekt "elpris" skapat (Europa, Data API av, RLS på)
+- [x] Supabase-uppgifter i .env: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+      (session pooler, fungerar både lokalt och från GitHub Actions)
+- [ ] Koppla pipelinen till Supabase   ← BÖRJA HÄR
 
 ## Nästa steg
-1. Starta Docker Desktop och kör `docker compose up -d`
-2. Kör `python -m src.main` och se att den säger "redan uppdaterad" eller hämtar nya dagar
-3. Schemaläggning: lära sig cron, och fundera på vad som händer om datorn är avstängd
+1. Ändra get_engine() i load.py så att den läser DB_*-variablerna
+   (bygg adressen säkert, lösenordet kan innehålla specialtecken)
+2. Kör `python -m src.main` mot Supabase (tom databas → hämtar från 2026-01-01)
+3. Kolla tabellen i Supabase (Table Editor)
+4. GitHub Actions: kör main.py automatiskt varje dag
+   (lösenorden som GitHub Secrets)
 
 ## Senare
 - Export till Excel → Power BI
@@ -48,3 +52,6 @@
 - Skriv aldrig till databasen med `python -m src.load`. All skrivning går via main.py
   (annars blir det dubbletter, eftersom load använder append)
 - Förstå bättre senare: varför importer letas efter från startpunkten
+## Att komma ihåg
+- Supabase gratis: pausas efter 7 dagars inaktivitet
+- Lösenordet finns i .env och i lösenordshanteraren, kan återställas i Supabase
