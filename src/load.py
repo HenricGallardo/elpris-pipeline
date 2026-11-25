@@ -1,6 +1,6 @@
 import os                                       # Läser miljövariabler
 from dotenv import load_dotenv                  # Läser in .env-filen
-from sqlalchemy import create_engine, text      # Ansluter till databasen och skickar SQL
+from sqlalchemy import create_engine, text, inspect     # Ansluter till databasen och skickar SQL
 
 
 def get_engine():
@@ -20,7 +20,7 @@ def load(df):                                   # Tar emot tabellen som paramete
     df.to_sql(
         "prices",              # Tabellens namn i databasen
         engine,                # Anslutningen: vilken databas vi skriver till
-        if_exists="replace",   # Om tabellen redan finns: ersätt den
+        if_exists="append",    # Lägg till de nya raderna (skapar tabellen om den inte finns)
         index=False,           # Ta inte med pandas radnummer som en kolumn
     )
 
@@ -30,14 +30,18 @@ def load(df):                                   # Tar emot tabellen som paramete
 
 
 def get_latest_date():
-    engine = get_engine()                              # Hämta anslutningen
+    """Returnerar senaste datumet i tabellen prices, eller None om tabellen saknas."""
+    engine = get_engine()
 
-    with engine.connect() as conn:                     # Ring databasen
-        latest = conn.execute(text("SELECT MAX(date) FROM prices;")).scalar()  # Fråga efter senaste dagen
+    if not inspect(engine).has_table("prices"):  # Finns tabellen inte än? 
+        return None                              # Då finns inget senaste datum
 
-    return latest                                      # Lämna tillbaka svaret
+    with engine.connect() as conn:
+        latest = conn.execute(text("SELECT MAX(date) FROM prices;")).scalar()
+
+    return latest                                # Ett datum, eller None om tabellen är tom
+
+
 
 if __name__ == "__main__":                      # Bara när load.py körs direkt
-#    print(get_latest_date())                    # Testa: vilket är senaste datumet i databasen?
-    from src.transform import transform        
-    load(transform())                           # Hämta tabellen och skriv den till databasen
+    print(get_latest_date())                    # Testa: vilket är senaste datumet i databasen?
