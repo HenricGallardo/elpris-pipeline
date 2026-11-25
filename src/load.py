@@ -29,6 +29,15 @@ def load(df):                                   # Tar emot tabellen som paramete
     print(f"Klart! {count} rader i tabellen prices.")
 
 
+def get_latest_date():
+    engine = get_engine()                              # Hämta anslutningen
+
+    with engine.connect() as conn:                     # Ring databasen
+        latest = conn.execute(text("SELECT MAX(date) FROM prices;")).scalar()  # Fråga efter senaste dagen
+
+    return latest                                      # Lämna tillbaka svaret
+
 if __name__ == "__main__":                      # Bara när load.py körs direkt
+#    print(get_latest_date())                    # Testa: vilket är senaste datumet i databasen?
     from src.transform import transform        
     load(transform())                           # Hämta tabellen och skriv den till databasen
