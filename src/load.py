@@ -26,6 +26,8 @@ def load(df):                                   # Tar emot tabellen som paramete
         engine,                # Anslutningen: vilken databas vi skriver till
         if_exists="append",    # Lägg till de nya raderna (skapar tabellen om den inte finns)
         index=False,           # Ta inte med pandas radnummer som en kolumn
+        method="multi",        # Skicka många rader i varje SQL-fråga
+        chunksize=1000,        # 1000 rader åt gången
     )
 
     with engine.connect() as conn:              # Kontrollera hur många rader som kom in
