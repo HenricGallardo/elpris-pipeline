@@ -1,16 +1,20 @@
 import os                                       # Läser miljövariabler
 from dotenv import load_dotenv                  # Läser in .env-filen
 from sqlalchemy import create_engine, text, inspect     # Ansluter till databasen och skickar SQL
-
+from sqlalchemy.engine import URL                # Bygger anslutningsadressen säkert
 
 def get_engine():
     """Skapar anslutningen till databasen med inställningarna från .env."""
-    load_dotenv()                                                                 # Läs .env
-    name = os.getenv("POSTGRES_USER")                                             # Användarnamn
-    password = os.getenv("POSTGRES_PASSWORD")                                     # Lösenord
-    db = os.getenv("POSTGRES_DB")                                                 # Databasens namn
-    engine = create_engine(f"postgresql://{name}:{password}@localhost:5432/{db}") # Skapa anslutningen
-    return engine                                                                 # Lämna tillbaka den
+    load_dotenv()                                # Läs .env
+    url = URL.create(
+        drivername="postgresql",                 # Typ av databas
+        username=os.getenv("DB_USER"),           # Användare
+        password=os.getenv("DB_PASSWORD"),       # Lösenord (specialtecken hanteras automatiskt)
+        host=os.getenv("DB_HOST"),               # Datorn: Supabases server
+        port=int(os.getenv("DB_PORT")),          # Porten, gjord till ett tal
+        database=os.getenv("DB_NAME"),           # Databasens namn
+    )
+    return create_engine(url)                    # Skapa och lämna tillbaka anslutningen
 
 
 def load(df):                                   # Tar emot tabellen som parameter
