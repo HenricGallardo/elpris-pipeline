@@ -1,10 +1,11 @@
+import os                                        # Verktyg för att arbeta med mappar och filer
 import requests                                  # Verktyg för att hämta data från internet
 import time                                      # Verktyg för att kunna vänta/pausa
 from datetime import date, timedelta             # Verktyg för att räkna med datum
 import json                                      # Verktyg för att spara och läsa JSON-filer
 
 
-def extract(start):                              # ← ÄNDRAT: tar emot startdatumet
+def extract(start):                              # Tar emot startdatumet
     """Hämtar elpriser från start till i dag och sparar i data/raw/prices.json."""
     end = date.today()                           # Dagens dag
 
@@ -28,6 +29,7 @@ def extract(start):                              # ← ÄNDRAT: tar emot startda
         day = day + timedelta(days=1)            # Nästa dag
 
     print(len(all_data))                         # Hur många rader vi fick totalt
+    os.makedirs("data/raw", exist_ok=True)      # Skapa mappen om den inte finns
     with open("data/raw/prices.json", "w") as f: # Öppna (skapa) filen för att skriva
         json.dump(all_data, f)                   # Skriv hela listan till filen
 
