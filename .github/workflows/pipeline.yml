@@ -1,0 +1,31 @@
+name: Daily pipeline                     # Namnet som syns på GitHub
+
+on:                                      # NÄR ska den köras?
+  schedule:
+    - cron: "0 6 * * *"                  # Varje dag kl. 06:00 UTC (07:00 svensk vintertid)
+  workflow_dispatch:                     # Och när du trycker på en knapp (bra för att testa)
+
+jobs:
+  run-pipeline:                          # Namnet på jobbet (du väljer själv)
+    runs-on: ubuntu-latest               # Låna en dator med Linux
+
+    steps:                               # VAD ska göras, i ordning
+      - name: Hämta koden
+        uses: actions/checkout@v4        # Färdigt steg: hämtar ditt repo till datorn
+
+      - name: Installera Python
+        uses: actions/setup-python@v5    # Färdigt steg: installerar Python
+        with:
+          python-version: "3.12"
+
+      - name: Installera biblioteken
+        run: pip install -r requirements.txt   # Samma kommando som du skulle köra själv
+
+      - name: Kör pipelinen
+        run: python -m src.main          # Samma kommando som du kör lokalt
+        env:                             # Ge datorn hemligheterna som miljövariabler
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
