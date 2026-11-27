@@ -2,56 +2,62 @@
 
 ## Status
 - [x] Extract: extract(start) hämtar elpriser för SE1–SE4 från start till date.today()
-      Sparas i data/raw/prices.json (ignoreras av git)
+      Sparas i data/raw/prices.json (ignoreras av git), mappen skapas automatiskt
 - [x] Transform: transform() rensar kolumner, svensk tid, hjälpkolumner
       (date, hour, minute, weekday 1–7, month, is_weekend)
-- [x] PostgreSQL körs i Docker (docker-compose.yml)
-      Användare: henrik, databas: elpris, port: 5432
-      Lösenord och inställningar ligger i .env (ignoreras av git), mall i .env.example
-- [x] Load: load(df) lägger till rader i tabellen prices (if_exists="append")
+- [x] Load: load(df) lägger till rader i tabellen prices
+      (if_exists="append", method="multi", chunksize=1000)
       get_latest_date() frågar efter senaste datumet (None om tabellen saknas)
 - [x] main.py kör hela pipelinen: extract → transform → load
-- [x] Inkrementell hämtning fungerar (testat genom att radera dagar)
-- [x] Supabase-projekt "elpris" skapat (Europa, Data API av, RLS på)
-- [x] Supabase-uppgifter i .env: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
-      (session pooler, fungerar både lokalt och från GitHub Actions)
-- [ ] Koppla pipelinen till Supabase   ← BÖRJA HÄR
+- [x] Inkrementell hämtning: hämtar bara dagar som saknas
+      Tom databas → börjar från FIRST_DATE (2026-01-01)
+      Redan uppdaterad → "Inget nytt att hämta"
+- [x] Supabase-projekt "elpris" (Europa, Data API av, RLS på, session pooler)
+      get_engine() läser DB_*-variablerna och bygger adressen med URL.create,
+      drivername "postgresql+psycopg2"
+- [x] GitHub Actions kör pipelinen varje dag kl. 06:00 UTC
+      (.github/workflows/pipeline.yml)
+      Hemligheter i GitHub: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+      Kan köras för hand: Actions → Daily pipeline → Run workflow
+- [x] Docker-databas finns kvar lokalt (docker-compose.yml, POSTGRES_*-variablerna)
+      men används inte längre av pipelinen
 
-## Nästa steg
-1. Ändra get_engine() i load.py så att den läser DB_*-variablerna
-   (bygg adressen säkert, lösenordet kan innehålla specialtecken)
-2. Kör `python -m src.main` mot Supabase (tom databas → hämtar från 2026-01-01)
-3. Kolla tabellen i Supabase (Table Editor)
-4. GitHub Actions: kör main.py automatiskt varje dag
-   (lösenorden som GitHub Secrets)
+## Nästa steg (välj ett spår)
+1. Tester med pytest + få test.yml att köra dem vid varje push
+2. Power BI: visualisera datan från Supabase
+3. Webbapp: FastAPI + React (TypeScript), kvartsdiagram per elområde
 
 ## Senare
-- Export till Excel → Power BI
-- Tester (pytest) + CI (GitHub Actions)
 - Primärnyckel på (start, area) så att dubbletter inte kan uppstå
 - Felhantering i extract (t.ex. om API:t inte svarar)
+- Låsa versioner i requirements.txt med ==
+- Hämta morgondagens priser när de är publicerade (efter ca 13:00)
 - Helgdagar som extra data
-- Fullstack-app: FastAPI + React (TypeScript), kvartsdiagram per elområde
+- Prognosmodell (ML) för priser längre fram
 
 ## Bra kommandon
-- `docker compose up -d`: starta databasen
-- `docker compose down`: stoppa den (datan finns kvar)
-- `docker compose down -v`: stoppa och RADERA datan (försiktigt!)
-- `docker compose exec db psql -U henrik -d elpris`: gå in i databasen (`\q` för att gå ut)
-- `python -m src.main`: kör hela pipelinen
+- `python -m src.main`: kör hela pipelinen (mot Supabase)
 - `python -m src.load`: visar senaste datumet i databasen (ofarligt test)
+- `git status`: kontrollera ändringar (och att .env inte syns!)
+- `docker compose up -d` / `docker compose down`: starta/stoppa den lokala databasen
+- `docker compose down -v`: stoppa och RADERA lokal data (försiktigt!)
+- `docker compose exec db psql -U henrik -d elpris`: gå in i lokala databasen (`\q` för att gå ut)
 
-## Bra SQL
+## Bra SQL (Supabase → SQL Editor)
 - `SELECT COUNT(*) FROM prices;`: antal rader
 - `SELECT MAX(date) FROM prices;`: senaste dagen
-- `SELECT area, AVG(price_sek) FROM prices GROUP BY area;`: snittpris per elområde
+- `SELECT area, ROUND(AVG(price_sek)::numeric, 2) FROM prices GROUP BY area ORDER BY area;`:
+  snittpris per elområde
 - `DELETE FROM prices WHERE date >= '2026-11-23';`: radera dagar (glöm inte WHERE!)
 
 ## Att komma ihåg
 - Kör filer med `python -m src.fil`, inte play-knappen (annars hittas inte `src`)
-- Skriv aldrig till databasen med `python -m src.load`. All skrivning går via main.py
+- Skriv aldrig till databasen med load.py direkt. All skrivning går via main.py
   (annars blir det dubbletter, eftersom load använder append)
-- Förstå bättre senare: varför importer letas efter från startpunkten
-## Att komma ihåg
-- Supabase gratis: pausas efter 7 dagars inaktivitet
+- "Fungerar lokalt" ≠ "fungerar i CI": olika versioner av bibliotek kan bete sig olika
+  (SQLAlchemy valde psycopg 3 på GitHub). Ange drivrutin uttryckligen, eller lås versioner
+- Läs en traceback nerifrån och upp: sista raden är felet
+- Supabase gratis: pausas efter 7 dagars inaktivitet (den dagliga körningen håller den vaken)
+- GitHub stänger av schemalagda workflows efter 60 dagar utan aktivitet i repot
 - Lösenordet finns i .env och i lösenordshanteraren, kan återställas i Supabase
+- Förstå bättre senare: varför importer letas efter från startpunkten
