@@ -7,7 +7,7 @@ def get_engine():
     """Skapar anslutningen till databasen med inställningarna från .env."""
     load_dotenv()                                # Läs .env
     url = URL.create(
-        drivername="postgresql",                 # Typ av databas
+        drivername="postgresql+psycopg2",                 # Typ av databas
         username=os.getenv("DB_USER"),           # Användare
         password=os.getenv("DB_PASSWORD"),       # Lösenord (specialtecken hanteras automatiskt)
         host=os.getenv("DB_HOST"),               # Datorn: Supabases server
